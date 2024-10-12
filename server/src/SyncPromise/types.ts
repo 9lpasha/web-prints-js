@@ -1,12 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import type {SyncPromise} from './syncPromise';
 
-export type Nullable<T> = null | undefined | T;
-export type AnyOneArgFunction<ARG = unknown, R = unknown> = (arg: ARG) => R;
-
 export type CanPromiseLike<T> = T | PromiseLike<T>;
-
-export type PromiseMonad<T> = Promise<T> | SyncPromise<T>;
 
 export type PromiseState = 'pending' | 'fulfilled' | 'rejected';
 

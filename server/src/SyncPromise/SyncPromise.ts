@@ -2,17 +2,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import {isPromiseLike} from './utils';
 
-import {
-  AnyOneArgFunction,
-  InitRejectHandler,
-  InitResolveHandler,
-  Executor,
-  Nullable,
-  PromiseState,
-  RejectHandler,
-  ResolveHandler,
-  Value,
-} from './types';
+import {InitRejectHandler, InitResolveHandler, Executor, PromiseState, RejectHandler, ResolveHandler, Value} from './types';
+import {AnyOneArgFunction, Nullable} from 'src/types/global';
 
 const noop = () => undefined;
 
@@ -85,7 +76,7 @@ export class SyncPromise<T> implements Promise<T> {
   then<TResult1 = T, TResult2 = never>(
     fulfilled?: Nullable<(value: T) => TResult1 | PromiseLike<TResult1>>,
     rejected?: Nullable<(reason: any) => TResult2 | PromiseLike<TResult2>>,
-  ): Promise<TResult1 | TResult2>;
+  ): SyncPromise<TResult1 | TResult2>;
   then(fulfilled?: Nullable<ResolveHandler<T>>, rejected?: Nullable<RejectHandler<T>>): SyncPromise<T> {
     return new SyncPromise<T>((resolve, reject) => {
       const fulfillWrapper = (value?: Value) => {

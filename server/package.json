@@ -52,8 +52,9 @@
       "json",
       "ts"
     ],
-    "rootDir": "src",
+    "rootDir": ".",
     "testRegex": ".*\\.(spec|test)\\.ts$",
+    "modulePaths": ["<rootDir>"],
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
@@ -62,5 +63,8 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "ts-jest": {
+    "tsconfig": "./tsconfig.json"
   }
 }
