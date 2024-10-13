@@ -11,7 +11,6 @@ export class TranslatorAsyncEngine extends WithValidator implements TranslatorEn
       promises.push(this.validator.isNode(node));
     }
 
-    // return Promise.all(promises);
     return new Promise<TranslatorResult>((res) => {
       res({
         html: '<div>123</div>',
