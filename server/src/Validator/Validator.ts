@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {TranslatorNode} from 'src/Node/types';
 import {NodeValidator, ValidatorEngine} from './types';
 import {ValidatorSyncEngine} from './engines/ValidatorSyncEngine';
@@ -22,5 +23,13 @@ export class Validator implements NodeValidator {
 
   isNode(node: TranslatorNode): PromiseMonad<boolean> {
     return this.engine.isNode(node);
+  }
+
+  isHtmlButtonNode(node: TranslatorNode): PromiseMonad<boolean> {
+    throw new Error('Method not implemented.');
+  }
+
+  isCssNode(node: TranslatorNode): PromiseMonad<boolean> {
+    throw new Error('Method not implemented.');
   }
 }
