@@ -16,27 +16,33 @@ import {drawConnectArrow, drawGrid, drawTempConnectArrow} from '../CanvasReact.h
 
 export class CanvasManager {
   private canvas: HTMLCanvasElement;
+  private canvasBack: HTMLCanvasElement;
+  private canvasTemp: HTMLCanvasElement;
   private arrowManager: ArrowManager;
   private state: ActionsState = ActionsState.default;
   private stopUserEventFlag = false;
   private accumulatedScale = 0;
   private currentMovingNodePosition = {x: 0, y: 0};
+  private isChangedSizePosition = true;
+  private redrawedCanvasAfterMovingNode = true;
   public nodes: Node[] = [];
   public ctx: CanvasRenderingContext2D;
+  public ctxBack: CanvasRenderingContext2D;
+  public ctxTemp: CanvasRenderingContext2D;
   public movingNode: undefined | Node;
   public startArrowPoint: undefined | ConnectPoint;
   public hoverItem: WithPrevState<ConnectPoint | Node> = {prev: null, current: null};
   public finishArrowPoint: undefined | ConnectPoint;
   public tempArrow: undefined | Arrow;
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(canvas: HTMLCanvasElement, canvasBack: HTMLCanvasElement, canvasTemp: HTMLCanvasElement) {
     this.canvas = canvas;
-    canvas.style.width = window.screen.width + 'px';
-    canvas.style.height = window.screen.height + 'px';
-    canvas.height = window.screen.height;
-    canvas.width = window.screen.width;
+    this.canvasBack = canvasBack;
+    this.canvasTemp = canvasTemp;
 
     this.ctx = canvas.getContext('2d')!;
+    this.ctxBack = canvasBack.getContext('2d')!;
+    this.ctxTemp = canvasTemp.getContext('2d')!;
     this.arrowManager = new ArrowManager(this);
 
     const canvasInnerW = window.innerWidth - 150;
@@ -69,25 +75,25 @@ export class CanvasManager {
 
     this.draw();
 
-    // Initialize event handlers
-    if (this.canvas) {
-      this.canvas.onmousedown = (e) => {
+    // Инициализация event хэндлеров
+    if (this.canvasTemp) {
+      this.canvasTemp.onmousedown = (e) => {
         this.handleMouseDown(e);
       };
 
-      this.canvas.onmousemove = (e) => {
+      this.canvasTemp.onmousemove = (e) => {
         this.handleMouseMove(e);
       };
 
-      this.canvas.onmouseup = () => {
+      this.canvasTemp.onmouseup = () => {
         this.handleMouseUp();
       };
 
-      this.canvas.onmouseleave = () => {
+      this.canvasTemp.onmouseleave = () => {
         this.handleMouseLeave();
       };
 
-      this.canvas.onwheel = (e) => {
+      this.canvasTemp.onwheel = (e) => {
         this.handleWheel(e);
       };
 
@@ -100,20 +106,46 @@ export class CanvasManager {
   // Метод для отрисовки всех фигур и стрелок
   public draw() {
     // Очищаем canvas перед отрисовкой
+    if (this.isChangedSizePosition) {
+      this.ctxBack.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctxTemp.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     // Отрисовка сетки
-    drawGrid(this.ctx, this.canvas.width, this.canvas.height);
+    if (this.isChangedSizePosition) {
+      drawGrid(this.ctxBack, this.canvas.width, this.canvas.height);
+      this.isChangedSizePosition = false;
+    }
 
     // Отрисовка всех фигур
     this.nodes.forEach((node) => {
-      node.draw(this.ctx);
+      if (node !== this.movingNode) node.draw(this.ctx);
     });
 
     // Отрисовка стрелок
     this.arrowManager.arrows.forEach((arrow) => {
-      drawConnectArrow(this.ctx, arrow.path);
+      if (arrow.from.node !== this.movingNode && arrow.to.node !== this.movingNode) drawConnectArrow(this.ctx, arrow.path);
     });
+  }
+
+  drawMovingNode() {
+    if (!this.redrawedCanvasAfterMovingNode) {
+      this.redrawedCanvasAfterMovingNode = true;
+      this.draw();
+    }
+
+    this.ctxTemp.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    if (this.movingNode) {
+      this.movingNode.draw(this.ctxTemp);
+
+      const arrows = this.arrowManager.arrows.filter((arrow) => arrow.from.node === this.movingNode || arrow.to.node === this.movingNode);
+
+      arrows.forEach((arrow) => {
+        drawConnectArrow(this.ctxTemp, arrow.path);
+      });
+    }
   }
 
   public addNode(type: NodeType, tagName?: keyof HTMLElementTagNameMap) {
@@ -174,11 +206,11 @@ export class CanvasManager {
     }
   }
 
-  private moveCanvas(e: MouseEvent) {
-    canvasWindowOptions.min.x -= e.movementX / scale;
-    canvasWindowOptions.min.y -= e.movementY / scale;
-    canvasWindowOptions.max.x -= e.movementX / scale;
-    canvasWindowOptions.max.y -= e.movementY / scale;
+  private moveCanvas(x: number, y: number) {
+    canvasWindowOptions.min.x += x / scale;
+    canvasWindowOptions.min.y += y / scale;
+    canvasWindowOptions.max.x += x / scale;
+    canvasWindowOptions.max.y += y / scale;
 
     this.draw();
   }
@@ -200,7 +232,7 @@ export class CanvasManager {
           const endY = arrow.to.position.y;
 
           const path = drawTempConnectArrow({
-            ctx: this.ctx,
+            ctx: this.ctxTemp,
             startX,
             startY,
             endX,
@@ -217,7 +249,7 @@ export class CanvasManager {
           const endX = node.connectPoints.top.position.x;
           const endY = node.connectPoints.top.position.y;
           const path = drawTempConnectArrow({
-            ctx: this.ctx,
+            ctx: this.ctxTemp,
             startX,
             startY,
             endX,
@@ -248,7 +280,7 @@ export class CanvasManager {
           const endY = arrow.to.position.y;
 
           const path = drawTempConnectArrow({
-            ctx: this.ctx,
+            ctx: this.ctxTemp,
             startX,
             startY,
             endX,
@@ -265,7 +297,7 @@ export class CanvasManager {
           const endX = node.connectPoints.right.position.x;
           const endY = node.connectPoints.right.position.y;
           const path = drawTempConnectArrow({
-            ctx: this.ctx,
+            ctx: this.ctxTemp,
             startX,
             startY,
             endX,
@@ -296,7 +328,7 @@ export class CanvasManager {
           const endY = arrow.to.position.y;
 
           const path = drawTempConnectArrow({
-            ctx: this.ctx,
+            ctx: this.ctxTemp,
             startX,
             startY,
             endX,
@@ -313,7 +345,7 @@ export class CanvasManager {
           const endX = node.connectPoints.bottom.position.x;
           const endY = node.connectPoints.bottom.position.y;
           const path = drawTempConnectArrow({
-            ctx: this.ctx,
+            ctx: this.ctxTemp,
             startX,
             startY,
             endX,
@@ -344,7 +376,7 @@ export class CanvasManager {
           const endY = arrow.to.position.y;
 
           const path = drawTempConnectArrow({
-            ctx: this.ctx,
+            ctx: this.ctxTemp,
             startX,
             startY,
             endX,
@@ -361,7 +393,7 @@ export class CanvasManager {
           const endX = node.connectPoints.left.position.x;
           const endY = node.connectPoints.left.position.y;
           const path = drawTempConnectArrow({
-            ctx: this.ctx,
+            ctx: this.ctxTemp,
             startX,
             startY,
             endX,
@@ -376,12 +408,12 @@ export class CanvasManager {
       }
     }
 
-    this.draw();
+    this.drawMovingNode();
   }
 
   private handleMouseMove(e: MouseEvent): void {
     if (this.state === ActionsState.movingCanvas) {
-      this.moveCanvas(e);
+      this.moveCanvas(-e.movementX, -e.movementY);
     } else if (this.state === ActionsState.movingNode) {
       const node = this.movingNode;
 
@@ -445,6 +477,10 @@ export class CanvasManager {
       this.tempArrow = undefined;
     }
 
+    if (this.movingNode) {
+      this.redrawedCanvasAfterMovingNode = false;
+    }
+
     this.movingNode = undefined;
     this.startArrowPoint = undefined;
     this.finishArrowPoint = undefined;
@@ -457,6 +493,7 @@ export class CanvasManager {
   }
 
   private handleWheel(e: WheelEvent) {
+    // Масштабирование
     if (e.ctrlKey) {
       e.preventDefault();
 
@@ -497,7 +534,11 @@ export class CanvasManager {
 
         this.draw();
       }
+    } else {
+      this.moveCanvas(e.deltaX, e.deltaY);
     }
+
+    this.isChangedSizePosition = true;
   }
 
   private handleResize() {

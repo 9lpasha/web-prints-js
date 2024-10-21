@@ -7,8 +7,10 @@ export const CanvasReact = () => {
 
   useEffect(() => {
     const canvas = document.querySelector('#canvas') as HTMLCanvasElement;
+    const canvasBack = document.querySelector('#canvasBack') as HTMLCanvasElement;
+    const canvasTemp = document.querySelector('#canvasTemp') as HTMLCanvasElement;
 
-    setCanvasManager(new CanvasManager(canvas));
+    setCanvasManager(new CanvasManager(canvas, canvasBack, canvasTemp));
   }, []);
 
   return (
@@ -21,7 +23,27 @@ export const CanvasReact = () => {
         <button onClick={() => canvasManager?.addNode(NodeType.event)}>Add Event click</button>
         <button onClick={() => canvasManager?.addNode(NodeType.function)}>Add function</button>
       </div>
-      <canvas id='canvas' />
+
+      <div style={{position: 'relative'}}>
+        <canvas
+          style={{height: window.screen.height + 'px', width: window.screen.width + 'px', position: 'absolute'}}
+          height={window.screen.height}
+          width={window.screen.width}
+          id='canvasBack'
+        />
+        <canvas
+          style={{height: window.screen.height + 'px', width: window.screen.width + 'px', position: 'absolute'}}
+          height={window.screen.height}
+          width={window.screen.width}
+          id='canvas'
+        />
+        <canvas
+          style={{height: window.screen.height + 'px', width: window.screen.width + 'px', position: 'absolute'}}
+          height={window.screen.height}
+          width={window.screen.width}
+          id='canvasTemp'
+        />
+      </div>
     </div>
   );
 };

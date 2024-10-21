@@ -49,7 +49,7 @@ export class ArrowManager {
         if (point && point.node !== this.manager.startArrowPoint?.node) {
           this.manager.finishArrowPoint = point;
           path = drawTempConnectArrow({
-            ctx: this.manager.ctx,
+            ctx: this.manager.ctxTemp,
             startX,
             startY,
             endX: point.position.x,
@@ -62,7 +62,7 @@ export class ArrowManager {
         } else {
           this.manager.finishArrowPoint = undefined;
           path = drawTempConnectArrow({
-            ctx: this.manager.ctx,
+            ctx: this.manager.ctxTemp,
             startX,
             startY,
             endX: e.offsetX,
@@ -74,7 +74,7 @@ export class ArrowManager {
       } else {
         this.manager.finishArrowPoint = undefined;
         path = drawTempConnectArrow({
-          ctx: this.manager.ctx,
+          ctx: this.manager.ctxTemp,
           startX,
           startY,
           endX: e.offsetX,
