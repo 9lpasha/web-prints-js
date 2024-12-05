@@ -10,7 +10,7 @@ export enum ActionsState {
 
 export enum NodeType {
   htmlElement = 'htmlElement',
-  style = 'style',
+  style = 'styles',
   event = 'event',
   variable = 'variable',
   function = 'function',

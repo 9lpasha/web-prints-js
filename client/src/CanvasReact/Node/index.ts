@@ -136,7 +136,9 @@ export class Node {
     {
       const x = this.position.x + text.x * scale;
       const y = this.position.y + text.y * scale;
-      drawText({ctx, x, y, fillColor: 'black', font: 24 * scale, textAlign: 'center', text: 'Header'});
+      const textNode = this.type === NodeType.htmlElement ? this.tagName : this.type;
+
+      drawText({ctx, x, y, fillColor: 'black', font: 24 * scale, textAlign: 'center', text: textNode || ''});
     }
 
     // Обозначаем hover эффект

@@ -20,7 +20,7 @@ export const CanvasReact = () => {
         <button onClick={() => canvasManager?.addNode(NodeType.htmlElement, 'button')}>Add button</button>
         <button onClick={() => canvasManager?.addNode(NodeType.style)}>Add styles</button>
         <button onClick={() => canvasManager?.addNode(NodeType.variable)}>Add variable</button>
-        <button onClick={() => canvasManager?.addNode(NodeType.event)}>Add Event click</button>
+        <button onClick={() => canvasManager?.addNode(NodeType.event)}>Add Event</button>
         <button onClick={() => canvasManager?.addNode(NodeType.function)}>Add function</button>
       </div>
 

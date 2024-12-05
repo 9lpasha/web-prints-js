@@ -24,7 +24,7 @@ export class CanvasManager {
   private accumulatedScale = 0;
   private currentMovingNodePosition = {x: 0, y: 0};
   private isChangedSizePosition = true;
-  private redrawedCanvasAfterMovingNode = true;
+  private redrawedCanvasAfterMovingNode = false;
   public nodes: Node[] = [];
   public ctx: CanvasRenderingContext2D;
   public ctxBack: CanvasRenderingContext2D;
@@ -149,30 +149,28 @@ export class CanvasManager {
   }
 
   public addNode(type: NodeType, tagName?: keyof HTMLElementTagNameMap) {
-    if (type === NodeType.htmlElement) {
-      // Создание позиции по сетке ближе к центру экрана
-      const position = {
-        x:
-          Math.round((canvasWindowOptions.min.x + canvasWindowOptions.width / 2 - defaultNodeSize.width / 2) / canvasQuadroSize) *
-          canvasQuadroSize,
-        y:
-          Math.round((canvasWindowOptions.min.y + canvasWindowOptions.height / 2 - defaultNodeSize.height / 2) / canvasQuadroSize) *
-          canvasQuadroSize,
-      };
-      const node = new Node({
-        height: defaultNodeSize.height,
-        width: defaultNodeSize.width,
-        type,
-        tagName,
-        position,
-        manager: this,
-        zIndex: this.nodes.length,
-      });
+    // Создание позиции по сетке ближе к центру экрана
+    const position = {
+      x:
+        Math.round((canvasWindowOptions.min.x + canvasWindowOptions.width / 2 - defaultNodeSize.width / 2) / canvasQuadroSize) *
+        canvasQuadroSize,
+      y:
+        Math.round((canvasWindowOptions.min.y + canvasWindowOptions.height / 2 - defaultNodeSize.height / 2) / canvasQuadroSize) *
+        canvasQuadroSize,
+    };
+    const node = new Node({
+      height: defaultNodeSize.height,
+      width: defaultNodeSize.width,
+      type,
+      tagName,
+      position,
+      manager: this,
+      zIndex: this.nodes.length,
+    });
 
-      this.nodes.push(node);
+    this.nodes.push(node);
 
-      this.draw();
-    }
+    this.draw();
   }
 
   private setHover(item: Node | ConnectPoint | null) {
